@@ -1,10 +1,9 @@
-#CUDA_DIR=/usr/local/cuda
 CHARMDIR=../..
 CHARMC=$(CHARMDIR)/bin/charmc
 
-NVCC = $(CUDA_DIR)/bin/nvcc
+include ../cuda.mk
 NVCC_FLAGS = -c -use_fast_math -DGPU_MEMPOOL #-DGPU_PROFILE -DGPU_TRACE #-DGPU_MEMPOOL_DEBUG -DGPU_WRQ_VERBOSE #-device-debug -deviceemu
-NVCC_INC = -I$(CUDA_DIR)/include -I.. 
+NVCC_INC += -I..
 
 all: libs
 	cp libcudahybridapi.a $(CHARMDIR)/lib

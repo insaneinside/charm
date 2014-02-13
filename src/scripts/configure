@@ -564,6 +564,9 @@ PACKAGE_URL=
 ac_unique_file="./Makefile"
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+ENABLE_CUDA
+NVCC_PATH
+CUDA_DIR
 SYNC
 base_version
 target_alias
@@ -622,10 +625,12 @@ with_refnum_type
 with_prio_type
 enable_randomized_msgq
 with_metis
+with_cuda
 '
       ac_precious_vars='build_alias
 host_alias
-target_alias'
+target_alias
+CUDA_DIR'
 
 
 # Initialize some variables set by options.
@@ -1257,6 +1262,13 @@ Optional Packages:
   --with-prio-type=type   size of expected message priorities
   --with-metis            support the METIS graph partitioner and associated
                           load balancer
+  --with-cuda[=PATH]      use CUDA (installed in PATH) [no]
+
+Some influential environment variables:
+  CUDA_DIR    CUDA toolkit install directory
+
+Use these variables to override the choices made by `configure' or to help
+it to find libraries and programs with nonstandard names/locations.
 
 Report bugs to the package provider.
 _ACEOF
@@ -4597,6 +4609,176 @@ $as_echo "\"$ext\"" >&6; }
   /bin/rm -f conftest.f90
 fi
 
+# Include CUDA detection script
+# ----------------------------------------------------------------
+# CUDA support
+#
+# Here we define and process a `--with-cuda[=PREFIX]` option.  By default CUDA
+# support is disabled: no automatic search for for the nVidia CUDA toolkit is
+# done.
+#
+# If the option is given without an argument or with an argument of "yes", we
+# search for CUDA in the following locations:
+#
+#   /usr/local/cuda			standard CUDA install directory
+#
+#   /usr/lib/nvidia-cuda-toolkit 	install directory for the system-
+#					installed CUDA toolkit package on Debian
+#                                       and Debian-based systems
+#
+# There are some arguments to AC_MSG_* with ugly formatting here; the formatting
+# is intentional (it produces nice, readable output in the generated `configure`
+# script).
+#
+# To enable automatic "use" of CUDA (i.e., setting ENABLE_CUDA to "yes" if CUDA
+# is found), change the assigned value of `ENABLE_CUDA` in the line directly
+# below this comment to "auto".  (You should also change the default-argument
+# value in the docstring passed to `AS_HELP_STRING` to match.)
+ENABLE_CUDA="no"
+
+
+
+# Check whether --with-cuda was given.
+if test "${with_cuda+set}" = set; then
+  withval=$with_cuda; CUDA_DIR=$withval
+else
+  CUDA_DIR=""
+fi
+
+
+# Interpret "--with-cuda" (i.e. no argument) as "enable CUDA support, please."
+# We also support using the argument "auto" for this purpose.
+if test "$CUDA_DIR" = "yes" || test "$CUDA_DIR" = "auto"; then
+    ENABLE_CUDA="yes"
+    CUDA_DIR=""
+fi
+
+if test "$ENABLE_CUDA" != "no"; then
+    if test -z "$CUDA_DIR"; then
+        CUDA_DIR_AUTOMATIC=yes
+        { $as_echo "$as_me:$LINENO: checking for CUDA toolkit directory" >&5
+$as_echo_n "checking for CUDA toolkit directory... " >&6; }
+        CUDA_CANDIDATE_DIRS="/usr/local/cuda /usr/lib/nvidia-cuda-toolkit"
+
+        for dir in $CUDA_CANDIDATE_DIRS; do
+            if test -d "$dir"; then
+                CUDA_DIR="$dir"
+                break
+            fi
+        done
+        if test -z "$CUDA_DIR"; then
+            if test "$ENABLE_CUDA" = "yes"; then
+                # User explicitly requested CUDA support but did not provide a
+                # directory argument; being unable to find a toolkit directory
+                # is an error.
+                { $as_echo "$as_me:$LINENO: result: not found" >&5
+$as_echo "not found" >&6; }
+                { { $as_echo "$as_me:$LINENO: error: \
+CUDA support explicitly enabled but the toolkit was not found by automatic path
+    search.  Specify CUDA toolkit location with \`--with-cuda=PATH\`." >&5
+$as_echo "$as_me: error: \
+CUDA support explicitly enabled but the toolkit was not found by automatic path
+    search.  Specify CUDA toolkit location with \`--with-cuda=PATH\`." >&2;}
+   { (exit 1); exit 1; }; }
+            else
+                { $as_echo "$as_me:$LINENO: result: not found.  CUDA support will be disabled." >&5
+$as_echo "not found.  CUDA support will be disabled." >&6; }
+                ENABLE_CUDA=no
+            fi
+        else
+            { $as_echo "$as_me:$LINENO: result: $CUDA_DIR" >&5
+$as_echo "$CUDA_DIR" >&6; }
+        fi
+    fi
+fi
+
+# Make sure we have the nVidia CUDA compiler available.  We give different
+# messages depending on how the `--with-cuda` option was passed to configure.
+if test "$ENABLE_CUDA" != "no"; then
+    # Extract the first word of "nvcc", so it can be a program name with args.
+set dummy nvcc; ac_word=$2
+{ $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_NVCC_PATH+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  case $NVCC_PATH in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_NVCC_PATH="$NVCC_PATH" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $CUDA_DIR/bin
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_NVCC_PATH="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+NVCC_PATH=$ac_cv_path_NVCC_PATH
+if test -n "$NVCC_PATH"; then
+  { $as_echo "$as_me:$LINENO: result: $NVCC_PATH" >&5
+$as_echo "$NVCC_PATH" >&6; }
+else
+  { $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+    if test -z "$NVCC_PATH" ; then
+        if test "$ENABLE_CUDA" = "yes"; then
+            if test "$CUDA_DIR_AUTOMATIC" = "yes"; then
+                { { $as_echo "$as_me:$LINENO: error: \
+\`bin/nvcc\` not found in automatically-selected CUDA toolkit directory.  Specify
+    CUDA toolkit location with \`--with-cuda=PATH\`." >&5
+$as_echo "$as_me: error: \
+\`bin/nvcc\` not found in automatically-selected CUDA toolkit directory.  Specify
+    CUDA toolkit location with \`--with-cuda=PATH\`." >&2;}
+   { (exit 1); exit 1; }; }
+            else
+                { { $as_echo "$as_me:$LINENO: error: \`bin/nvcc\` not found in specified CUDA install prefix." >&5
+$as_echo "$as_me: error: \`bin/nvcc\` not found in specified CUDA install prefix." >&2;}
+   { (exit 1); exit 1; }; }
+            fi
+        else                    # ENABLE_CUDA is "auto"
+            { $as_echo "$as_me:$LINENO: \
+\`bin/nvcc\` not found in automatically-selected CUDA toolkit directory; CUDA
+    support will be disabled.  If this is not what you want, try specifying a
+    valid CUDA toolkit install prefix using \`--with-cuda=PATH\`." >&5
+$as_echo "$as_me: \
+\`bin/nvcc\` not found in automatically-selected CUDA toolkit directory; CUDA
+    support will be disabled.  If this is not what you want, try specifying a
+    valid CUDA toolkit install prefix using \`--with-cuda=PATH\`." >&6;}
+            ENABLE_CUDA="no"
+        fi
+    fi
+fi
+
+# Set up `ENABLE_CUDA` for use by Make.
+if test "$ENABLE_CUDA" = "no"; then
+    ENABLE_CUDA=""
+else
+    ENABLE_CUDA="yes"
+fi
+
+
+
+
+
+
+ac_config_files="$ac_config_files cuda.mk"
+
+
 ac_config_files="$ac_config_files libs/ck-libs/ampi/ampiCC libs/ck-libs/ampi/ampirun"
 
 ac_config_commands="$ac_config_commands default"
@@ -5308,6 +5490,7 @@ do
   case $ac_config_target in
     "conv-autoconfig.h") CONFIG_HEADERS="$CONFIG_HEADERS conv-autoconfig.h" ;;
     "config-cleanup") CONFIG_COMMANDS="$CONFIG_COMMANDS config-cleanup" ;;
+    "cuda.mk") CONFIG_FILES="$CONFIG_FILES cuda.mk" ;;
     "libs/ck-libs/ampi/ampiCC") CONFIG_FILES="$CONFIG_FILES libs/ck-libs/ampi/ampiCC" ;;
     "libs/ck-libs/ampi/ampirun") CONFIG_FILES="$CONFIG_FILES libs/ck-libs/ampi/ampirun" ;;
     "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;

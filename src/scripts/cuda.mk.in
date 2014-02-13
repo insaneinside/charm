@@ -1,0 +1,9 @@
+# cuda.mk.in: Template for CUDA-support makefile
+
+ENABLE_CUDA = @ENABLE_CUDA@
+
+ifneq (,$(ENABLE_CUDA))
+CUDA_DIR = @CUDA_DIR@
+NVCC = @NVCC_PATH@
+NVCC_INC = -I$(CUDA_DIR)/include
+endif
