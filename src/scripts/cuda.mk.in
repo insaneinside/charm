@@ -1,9 +1,23 @@
-# cuda.mk.in: Template for CUDA-support makefile
+# cuda.mk[.in]: [Template for] CUDA-support makefile
 
-ENABLE_CUDA = @ENABLE_CUDA@
+# "yes" if we have the CUDA toolkit available, and empty otherwise.
+HAVE_CUDA=@HAVE_CUDA@
+# "yes" if we have the CUDA SDK available, and empty otherwise
+HAVE_CUDA_SDK=@HAVE_CUDA_SDK@
 
-ifneq (,$(ENABLE_CUDA))
-CUDA_DIR = @CUDA_DIR@
-NVCC = @NVCC_PATH@
-NVCC_INC = -I$(CUDA_DIR)/include
+# Whether the user explicitly asked us to enable use of CUDA.
+# Empty means "no".
+ENABLE_CUDA=@ENABLE_CUDA@
+
+ifneq (,$(HAVE_CUDA))
+ # CUDA toolkit install directory
+ CUDA_DIR = @CUDA_DIR@
+
+ ifneq (,$(HAVE_CUDA_SDK))
+  # CUDA SDK install directory
+  CUDA_SDK_DIR = @CUDA_SDK_DIR@
+ endif
+
+ # Path to the nVidia CUDA compiler
+ NVCC = @NVCC_PATH@
 endif
