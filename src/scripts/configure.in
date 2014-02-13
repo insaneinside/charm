@@ -2261,7 +2261,6 @@ fi
 
 # Include CUDA detection script
 m4_include([cuda.ac])
-AC_CONFIG_FILES([cuda.mk])
 
 AC_OUTPUT(
 libs/ck-libs/ampi/ampiCC libs/ck-libs/ampi/ampirun,
