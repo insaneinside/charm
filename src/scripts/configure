@@ -4676,10 +4676,15 @@ else
 fi
 
 
+# If CUDA_DIR is set, it's because the user gave the --with-cuda option in at
+# least _one_ of the valid forms.
+if test -n "$CUDA_DIR"; then
+    ENABLE_CUDA="yes"
+fi
+
 # Interpret "--with-cuda" (i.e. no argument) as "enable CUDA support, please."
 # We also support using the argument "auto" for this purpose.
 if test "$CUDA_DIR" = "yes" || test "$CUDA_DIR" = "auto"; then
-    ENABLE_CUDA="yes"
     CUDA_DIR=""
 fi
 
@@ -4717,18 +4722,18 @@ $as_echo "not found.  CUDA support will be disabled." >&6; }
                 ENABLE_CUDA="no"
                 HAVE_CUDA="no"
             fi
-        else                    # User gave explicit toolkit location.
-            if test -d "$CUDA_DIR"; then
-                { $as_echo "$as_me:$LINENO: result: $CUDA_DIR" >&5
+        fi
+    else                    # User gave explicit toolkit location.
+        if test -d "$CUDA_DIR"; then
+            { $as_echo "$as_me:$LINENO: result: $CUDA_DIR" >&5
 $as_echo "$CUDA_DIR" >&6; }
-                HAVE_CUDA="yes"
-            else
-                { $as_echo "$as_me:$LINENO: result: not found" >&5
+            HAVE_CUDA="yes"
+        else
+            { $as_echo "$as_me:$LINENO: result: not found" >&5
 $as_echo "not found" >&6; }
-                { { $as_echo "$as_me:$LINENO: error: specified CUDA toolkit directory was not found." >&5
-$as_echo "$as_me: error: specified CUDA toolkit directory was not found." >&2;}
+            { { $as_echo "$as_me:$LINENO: error: specified CUDA toolkit directory not found." >&5
+$as_echo "$as_me: error: specified CUDA toolkit directory not found." >&2;}
    { (exit 1); exit 1; }; }
-            fi
         fi
     fi
 fi
