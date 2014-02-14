@@ -4699,6 +4699,8 @@ $as_echo_n "checking for CUDA toolkit directory... " >&6; }
             if test -d "$dir"; then
                 CUDA_DIR="$dir"
                 HAVE_CUDA="yes"
+                { $as_echo "$as_me:$LINENO: result: $CUDA_DIR" >&5
+$as_echo "$CUDA_DIR" >&6; }
                 break
             fi
         done

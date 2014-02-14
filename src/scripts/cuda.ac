@@ -74,6 +74,7 @@ if test "$ENABLE_CUDA" != "no"; then
             if test -d "$dir"; then
                 CUDA_DIR="$dir"
                 HAVE_CUDA="yes"
+                AC_MSG_RESULT($CUDA_DIR)
                 break
             fi
         done
