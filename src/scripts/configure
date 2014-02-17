@@ -564,6 +564,7 @@ PACKAGE_URL=
 ac_unique_file="./Makefile"
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+CUDA_LEVEL
 HAVE_CUDA_SDK
 HAVE_CUDA
 ENABLE_CUDA
@@ -630,6 +631,7 @@ enable_randomized_msgq
 with_metis
 with_cuda
 with_cuda_sdk
+with_cuda_level
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1269,6 +1271,7 @@ Optional Packages:
                           load balancer
   --with-cuda[=PATH]      use CUDA (installed in PATH) [no]
   --with-cuda-sdk=PATH    specify the CUDA SDK install directory
+  --with-cuda-level=LEVEL use CUDA compute capability LEVEL
 
 Some influential environment variables:
   CUDA_DIR    CUDA toolkit install directory
@@ -4651,6 +4654,18 @@ fi
 #   * HAVE_CUDA_SDK: set to "yes"
 #   * CUDA_SDK_DIR: set to the path given as an argument to `--with-cuda-sdk`.
 #
+# Note that `ENABLE_CUDA` and all `HAVE_*` variables that are set to "no"
+# (which is the default) by configure are set to the empty string prior to
+# substitution into cuda.mk[.in].
+#
+# The final option we define is `--with-cuda-level`, which takes a mandatory
+# argument.  This can be used to specify the CUDA compute capability of the
+# target device(s) when the nVidia CUDA compiler is invoked; the argument
+# should be an integer value equal to ten times the documented compute
+# capability for the target device(s).  This one sets the following variable in
+# the generated cuda.mk.
+#
+#   * CUDA_LEVEL: set to the argument give to `--with-cuda-level` (default 10).
 #
 # There are some arguments to AC_MSG_* with ugly formatting here; the formatting
 # is intentional (it produces nice, readable output in the generated `configure`
@@ -4844,6 +4859,16 @@ $as_echo "$as_me: error: specified CUDA SDK directory not found." >&2;}
     fi
 fi
 
+# Allow setting CUDA compute capability at `configure`-time.
+
+# Check whether --with-cuda-level was given.
+if test "${with_cuda_level+set}" = set; then
+  withval=$with_cuda_level; CUDA_LEVEL=$enableval
+else
+  CUDA_LEVEL=10
+fi
+
+
 # Set up boolean AC_SUBST variables for use in Make.
 for var in HAVE_CUDA HAVE_CUDA_SDK ENABLE_CUDA; do
     eval value='$'"$var"
@@ -4851,6 +4876,7 @@ for var in HAVE_CUDA HAVE_CUDA_SDK ENABLE_CUDA; do
         eval "$var=''"
     fi
 done
+
 
 
 
